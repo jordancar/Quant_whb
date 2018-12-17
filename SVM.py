@@ -13,7 +13,7 @@ if __name__ == '__main__':
     model = svm.SVC()               # 建模
     model.fit(train, target)        # 训练
     ans2 = model.predict(test_case) # 预测
-    # 输出对2018-03-02的涨跌预测，1表示涨，0表示不涨。
+   # 输出对2018-03-02的涨跌预测，1表示涨，0表示不涨。
     print(ans2[0])
 
 

@@ -13,6 +13,7 @@ now_time=str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 end_time=str((datetime.datetime.today()-datetime.timedelta(days=8)).strftime('%Y-%m-%d'))
 bt=back_test(operate_tm=str(now_time),end_time=end_time,strategy='') #初始化回测参数类
 
+
 def write_para(): #写入本次回测参数配置
     para_list=[bt.start_time, \
         bt.end_time, \
@@ -29,8 +30,8 @@ def write_para(): #写入本次回测参数配置
     cursor.execute(sql_para_write)
     db.commit() 
 def get_sharp_rate():
-    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
-    cursor = db.cursor()
+    # db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
+    # cursor = db.cursor()
     sql_cap = "select * from my_capital a order by seq asc"
     cursor.execute(sql_cap)
     done_exp = cursor.fetchall()
@@ -64,7 +65,7 @@ if __name__ == '__main__':
     # date_seq_end = str(year) + '-12-04'
     date_seq_end=bt.end_time
     # stock_pool = ['603912.SH', '300666.SZ', '300618.SZ', '002049.SZ', '300672.SZ']
-    stock_pool=bt.stock_pool_9
+    stock_pool=bt.stock_pool
     
     # 先清空之前的测试记录,并创建中间表
     sql_wash1 = 'delete from my_capital where seq != 1'
@@ -78,6 +79,7 @@ if __name__ == '__main__':
     cursor.execute(sql_wash4)
     db.commit()
     in_str = '('
+    print stock_pool
     for x in range(len(stock_pool)):
         if x != len(stock_pool)-1:
             in_str += str('\'') + str(stock_pool[x])+str('\',')
@@ -147,6 +149,22 @@ if __name__ == '__main__':
     sharp,c_std = get_sharp_rate()
     print('Sharp Rate : ' + str(sharp))
     print('Risk Factor : ' + str(c_std))
+
+
+    #####################draw stock profit curve####################
+    def draw_stock_curve(code):
+        sql_stock = "select * from stock_all a where a.stock_code = '%s' and a.state_dt >= '%s' and a.state_dt <= '%s' order by state_dt asc"%(code,date_seq_start,date_seq_end)
+        cursor.execute(sql_stock)
+        stock_value = cursor.fetchall()
+        x_t = list(range(len(stock_value)))
+        y_v=[x[3] / stock_value[0][3] for x in stock_value]
+        return x_t,y_v
+
+    for code in stock_pool:
+        x_t,y_v=draw_stock_curve(code)
+        plt.plot(x_t, y_v,label=code)
+
+    #####################draw end ##################################
 
     sql_show_btc = "select * from stock_index a where a.stock_code = 'sh' and a.state_dt >= '%s' and a.state_dt <= '%s' order by state_dt asc"%(date_seq_start,date_seq_end)
     cursor.execute(sql_show_btc)

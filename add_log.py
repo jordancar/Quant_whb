@@ -7,3 +7,4 @@ st=logging.StreamHandler()
 st.setFormatter(LOG_FORMAT)
 # st.setLevel(logging.CRITICAL) #日志不输出
 logger.addHandler(st)
+

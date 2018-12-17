@@ -88,3 +88,23 @@ create table `top_list`(
         `reason` varchar(200) default null,
         PRIMARY KEY(`trade_date`,`ts_code`)
 )ENGINE=InnoDB default CHARSET=gbk;
+
+create table `stock_fmac`(
+        `trade_date` varchar(20) not null,
+        `ts_code` varchar(20) not null, 
+        `close` decimal(20,4) not null, 
+        `turnover_rate` decimal(20,4) not null,
+        `turnover_rate_f` decimal(20,4) not null, 
+        `volume_ratio` decimal(20,4) not null, 
+        `pe` decimal(20,4) not null, 
+        `pe_ttm` decimal(20,4) not null, 
+        `pb` decimal(20,4) not null,
+        `ps` decimal(20,4) not null, 
+        `ps_ttm` decimal(20,4) not null, 
+        `total_share` decimal(20,4) not null, 
+        `float_share` decimal(20,4) not null,
+        `free_share` decimal(20,4) not null, 
+        `total_mv` decimal(20,4) not null, 
+        `circ_mv` decimal(20,4) not null, 
+        PRIMARY KEY(`trade_date`,`ts_code`)
+)ENGINE=InnoDB default CHARSET=gbk;

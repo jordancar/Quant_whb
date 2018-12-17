@@ -34,7 +34,6 @@ def filter_main(stock_new,state_dt,predict_dt,poz):
     #后买入
     for stock_index in range(len(stock_new)):
         deal_buy = Deal.Deal(state_dt)
-
         # # 如果模型f1分值低于50则不买入
         # sql_f1_check = "select * from model_ev_resu a where a.stock_code = '%s' and a.state_dt < '%s' order by a.state_dt desc limit 1"%(stock_new[stock_index],state_dt)
         # cursor.execute(sql_f1_check)
