@@ -5,5 +5,5 @@ logger.setLevel(logging.DEBUG)
 LOG_FORMAT=logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 st=logging.StreamHandler()
 st.setFormatter(LOG_FORMAT)
-# st.setLevel(logging.CRITICAL) #鍏抽棴鎵€鏈塱nfo鍜宒ebug鏃ュ織杈撳嚭
+# st.setLevel(logging.CRITICAL) #日志不输出
 logger.addHandler(st)

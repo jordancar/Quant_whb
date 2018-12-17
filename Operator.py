@@ -2,12 +2,14 @@
 import pymysql.cursors
 import Deal
 from para_set import back_test
+from init_env import get_env
 bt=back_test() #初始化回测参数
-
+##################################################
+# 建立数据库连接,设置tushare的token,定义一些初始化参数
+env=get_env()
+db,cursor,pro=env.db,env.cursor,env.pro
+##################################################
 def buy(stock_code,opdate,buy_money):
-    # 建立数据库连接
-    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
-    cursor = db.cursor()
     deal_buy = Deal.Deal(opdate)
     print "deal_buy info:deal_buy.rest:%s,deal_buy.cur_capital:%s" %(str(deal_buy.cur_money_rest),str(deal_buy.cur_capital))
     print 'buy_money: ',buy_money
@@ -61,9 +63,8 @@ def buy(stock_code,opdate,buy_money):
 
 def sell(stock_code,opdate,predict):
     # 建立数据库连接
-    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
-    cursor = db.cursor()
-
+    # db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
+    # cursor = db.cursor()
     deal = Deal.Deal(opdate)
     init_price = deal.stock_map1[stock_code]
     hold_vol = deal.stock_map2[stock_code]

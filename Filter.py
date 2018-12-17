@@ -2,11 +2,14 @@
 import pymysql.cursors
 import Deal
 import Operator
-
+from init_env import get_env
 def filter_main(stock_new,state_dt,predict_dt,poz):
     # 建立数据库连接
-    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
-    cursor = db.cursor()
+    ##################################################
+    # 建立数据库连接,设置tushare的token,定义一些初始化参数
+    env=get_env()
+    db,cursor,pro=env.db,env.cursor,env.pro
+    ##################################################
 
     #先更新持股天数
     sql_update_hold_days = 'update my_stock_pool w set w.hold_days = w.hold_days + 1'

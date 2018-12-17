@@ -5,16 +5,17 @@ import pymysql
 import copy
 import tushare as ts
 import pandas as pd 
-
+from init_env import get_env
 
 # 返回的resu中 特征值按由小到大排列，对应的是其特征向量
 def get_portfolio(stock_list,state_dt,para_window):
     print "stock_list,state_dt,para_window: ",stock_list,state_dt,para_window
     # 建数据库连接，设置Tushare的token
-    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
-    cursor = db.cursor()
-    ts.set_token('23b817c8b6e2b772f37ad6f5628ad348a0aefed07ed9b07ecc75976d')
-    pro = ts.pro_api()
+    ##################################################
+    # 建立数据库连接,设置tushare的token,定义一些初始化参数
+    env=get_env()
+    db,cursor,pro=env.db,env.cursor,env.pro
+    ##################################################
 
     portfilio = stock_list
 

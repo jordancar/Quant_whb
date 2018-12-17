@@ -1,4 +1,5 @@
 #coding:utf8
+from init_env import get_env
 from sklearn import svm
 import pymysql.cursors
 import datetime
@@ -8,10 +9,11 @@ import tushare as ts
 
 def model_eva(stock,state_dt,para_window,para_dc_window):
     # 建立数据库连接，设置tushare token
-    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
-    cursor = db.cursor()
-    ts.set_token('9479832d9c2b7719809d7a39f606172d37d27af2f1713f6814493dfc')
-    pro = ts.pro_api()
+    ##################################################
+    # 建立数据库连接,设置tushare的token,定义一些初始化参数
+    env=get_env()
+    db,cursor,pro=env.db,env.cursor,env.pro
+    ##################################################
     # print 'into_eva'*10
     # 建评估时间序列, para_window参数代表回测窗口长度
     model_test_date_start = (datetime.datetime.strptime(state_dt, '%Y-%m-%d') - datetime.timedelta(days=para_window)).strftime(

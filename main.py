@@ -1,5 +1,6 @@
 ﻿#coding:utf-8
 from add_log import logger
+from init_env import get_env
 import pymysql
 import Model_Evaluate as ev
 import Filter
@@ -51,13 +52,12 @@ def get_sharp_rate():
     return sharp_rate,std
 
 if __name__ == '__main__':
-    
+    ##################################################
     # 建立数据库连接,设置tushare的token,定义一些初始化参数
-    db = pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
-    cursor = db.cursor()
-    write_para() #保存本次回测参数到本地
-    ts.set_token('23b817c8b6e2b772f37ad6f5628ad348a0aefed07ed9b07ecc75976d')
-    pro = ts.pro_api()
+    env=get_env()
+    db,cursor,pro=env.db,env.cursor,env.pro
+    ##################################################
+    write_para() #保存本次回测参数到本地`
     year = 2018
     # date_seq_start = str(year_2016) + '-01-01'
     date_seq_start=bt.start_time
