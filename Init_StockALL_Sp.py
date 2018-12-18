@@ -34,17 +34,19 @@ def time_used(bak):
 def init_top_list(start_dt,end_dt):#龙虎榜
     date_list=pd.date_range(start_dt,end_dt,freq='D')
     time_control=1
+    count_n=1
     start_time=time.time() #调用api初始时间
     for day in date_list:
         #频率控制模块
         time_control+=1
         sleep_time=time.time()-start_time
-        logger.info("sleep_time:{},start_time:{},api_times:{}".format(sleep_time,start_time,time_control))
+        logger.info("Seq[{}] of [{}] Total，sleep_time:{},start_time:{},api_times:{}".format(count_n,len(date_list),sleep_time,start_time,time_control))
+        count_n+=1
         if time_control %80 ==0 and sleep_time<=60:
+            logger.info("max retrive exceeded, preparing sleeping...{}s".format(60-sleep_time+3))
             time.sleep(60-sleep_time+3)
             start_time=time.time()
             time_control=1
-            logger.info("sleeping...{}s".format(60-sleep_time+3))
         elif sleep_time>=60:
             time_control=1
             start_time=time.time() #初始化starttime
@@ -232,11 +234,11 @@ if __name__ == '__main__':
     stock_pool=bt.stock_pool #从 paraset 获取
     logger.info(stock_pool)
     # stock_fmac(start_dt='20180601',end_dt=end_dt)
-    # init_top_list(start_dt,end_dt)
+    init_top_list(start_dt='20180101',end_dt=end_dt)
     # trade_cal() #初始化交易日期
     # init_stock_index() # 初始化上证指数
     # init_stock_all_plus() #拉取全部3556支股票前复权数据到本地
-    init_stock_all(stock_pool)#初始化stock_all用于量化分析
+    # init_stock_all(stock_pool)#初始化stock_all用于量化分析
     cursor.close()
     db.close()
     print('All Finished!')

@@ -13,7 +13,7 @@ def cap_update_daily(state_dt):
     for i in range(len(done_set)):
         stock_code = str(done_set[i][0])
         stock_vol = float(done_set[i][2])
-        sql = "select * from stock_info a where a.stock_code = '%s' and a.state_dt <= '%s' order by a.state_dt desc limit 1"%(stock_code,state_dt)
+        sql = "select * from stock_all_plus a where a.stock_code = '%s' and a.state_dt <= '%s' order by a.state_dt desc limit 1"%(stock_code,state_dt)
         cursor.execute(sql)
         done_temp = cursor.fetchall()
         db.commit()

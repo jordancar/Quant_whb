@@ -33,10 +33,11 @@ join
 (select a.*,@b:=@b+1 id  from my_capital a join  (select max(seq) seq,state_dt from my_capital group by state_dt) b  on a.seq=b.seq order by state_dt asc) b 
  where a.id-b.id=-1) c
  ) d  group by cum_rise_day;
-
+--获取各板块涨幅最高top3 
+select * from stock_all_plus a where state_dt='2018-08-17' and  1=(select count(*) top_1 from  stock_all_plus b where  state_dt='2018-08-17' and a.industry=b.industry and a.pct_change>=b.pct_change) and pct_change>-8 and pct_change<-5;
 
 --stock_pool choose 
-select distinct  stock_code from (select * from stock_all_plus a  where state_dt='2018-12-04' and 1>(select count(distinct stock_code) num from stock_all_plus b where state_dt='2018-12-04' and  b.amount>a.amount and b.industry=a.industry)) c
+select distinct  stock_code from (select * from stock_all_plus a  where state_dt='2018-12-04' and 1>=(select count(distinct stock_code) num from stock_all_plus b where state_dt='2018-12-04' and  b.amount>a.amount and b.industry=a.industry)) c
 into outfile '/Users/wanghongbo8/fonts_whb/stock_list.csv' character set utf8 
  fields terminated by ',' optionally enclosed by '"' 
  lines terminated by '\n';

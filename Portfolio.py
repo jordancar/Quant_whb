@@ -37,7 +37,7 @@ def get_portfolio(stock_list,state_dt,para_window):
         ti = model_test_date_seq[i]
         ri = []
         for j in range(len(portfilio)):
-            sql_select = "select * from stock_all a where a.stock_code = '%s' and a.state_dt >= '%s' and a.state_dt <= '%s' order by state_dt asc" % (portfilio[j], model_test_date_seq[i], model_test_date_seq[i + 4])
+            sql_select = "select * from stock_all_plus a where a.stock_code = '%s' and a.state_dt >= '%s' and a.state_dt <= '%s' order by state_dt asc" % (portfilio[j], model_test_date_seq[i], model_test_date_seq[i + 4])
             cursor.execute(sql_select)
             done_set = cursor.fetchall()
             db.commit()

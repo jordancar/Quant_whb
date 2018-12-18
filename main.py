@@ -122,6 +122,9 @@ if __name__ == '__main__':
         # 每5个交易日更新一次配仓比例
 
         if divmod(day_index+bt.operate_days-1,bt.operate_days)[1] == 0:
+            stock_pool=bt.get_stock_list(date_seq[i-1],1)#跟根据前一日板块top1获取stock_pool
+            
+            logger.info("Daynamic stock chosen strategy,new stock_pool:{}".format(stock_pool))
             portfolio_pool = stock_pool
             if len(portfolio_pool) < 5:
                 print('Less than 5 stocks for portfolio!! state_dt : ' + str(date_seq[i]))
@@ -153,7 +156,7 @@ if __name__ == '__main__':
 
     #####################draw stock profit curve####################
     def draw_stock_curve(code):
-        sql_stock = "select * from stock_all a where a.stock_code = '%s' and a.state_dt >= '%s' and a.state_dt <= '%s' order by state_dt asc"%(code,date_seq_start,date_seq_end)
+        sql_stock = "select * from stock_all_plus a where a.stock_code = '%s' and a.state_dt >= '%s' and a.state_dt <= '%s' order by state_dt asc"%(code,date_seq_start,date_seq_end)
         cursor.execute(sql_stock)
         stock_value = cursor.fetchall()
         x_t = list(range(len(stock_value)))
@@ -163,6 +166,7 @@ if __name__ == '__main__':
     for code in stock_pool:
         x_t,y_v=draw_stock_curve(code)
         plt.plot(x_t, y_v,label=code)
+    plt.legend()
 
     #####################draw end ##################################
 

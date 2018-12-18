@@ -17,7 +17,7 @@ def buy(stock_code,opdate,buy_money):
     #后买入
     if deal_buy.cur_money_rest+1 >= buy_money:
         print "deal_buy.cur_money_rest+1  : ",deal_buy.cur_money_rest+1 ,   "    buy_money: ",buy_money
-        sql_buy = "select * from stock_info a where a.state_dt = '%s' and a.stock_code = '%s'" % (opdate, stock_code)
+        sql_buy = "select * from stock_all_plus a where a.state_dt = '%s' and a.stock_code = '%s'" % (opdate, stock_code)
         cursor.execute(sql_buy)
         done_set_buy = cursor.fetchall()
         print done_set_buy,'donesetbuy'
@@ -72,7 +72,7 @@ def sell(stock_code,opdate,predict):
     init_price = deal.stock_map1[stock_code]
     hold_vol = deal.stock_map2[stock_code]
     hold_days = deal.stock_map3[stock_code]
-    sql_sell_select = "select * from stock_info a where a.state_dt = '%s' and a.stock_code = '%s'" % (opdate, stock_code)
+    sql_sell_select = "select * from stock_all_plus a where a.state_dt = '%s' and a.stock_code = '%s'" % (opdate, stock_code)
     cursor.execute(sql_sell_select)
     done_set_sell_select = cursor.fetchall()
     if len(done_set_sell_select) == 0:

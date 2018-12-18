@@ -20,7 +20,7 @@ def init_db():
     return cursor,db
 cursor,db=init_db()
 def collectDataAsDF(in_code):
-    sql_done_set = "SELECT * FROM stock_all a where stock_code = '%s'  order by state_dt asc" % (in_code)
+    sql_done_set = "SELECT * FROM stock_all_plus a where stock_code = '%s'  order by state_dt asc" % (in_code)
     cursor.execute(sql_done_set)
     done_set = cursor.fetchall()
     if len(done_set) == 0:
