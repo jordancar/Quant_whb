@@ -147,7 +147,7 @@ def init_stock_index():
 
 
 def init_stock_all_plus():
-    start_dt='20181204'
+    start_dt='20181201'
     df_dim=stock_list.stock_all()  #获取上证股票维表
     stock_big_pool=list(df_dim.ts_code) #A 股票 3565 股票 list
     stock_pool=stock_big_pool
