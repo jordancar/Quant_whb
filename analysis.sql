@@ -109,3 +109,15 @@ create table `stock_fmac`(
         `circ_mv` decimal(20,4) not null, 
         PRIMARY KEY(`trade_date`,`ts_code`)
 )ENGINE=InnoDB default CHARSET=gbk;
+
+--创建BTC库，5分钟级别
+create table btc_5min(
+        symbol varchar(50) not null,
+        date varchar(50) not null, 
+        open decimal(20,4) not null, 
+        high decimal(20,4) not null,
+        low decimal(20,4) not null,
+        close decimal(20,4) not null, 
+        vol  decimal(20,4) not null,
+        PRIMARY KEY(symbol,date)
+) ENGINE=InnoDB default CHARSET=gbk;

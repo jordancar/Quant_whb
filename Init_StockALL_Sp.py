@@ -147,15 +147,23 @@ def init_stock_index():
 
 
 def init_stock_all_plus():
-    start_dt='20181201'
+    start_dt='20100101'
     df_dim=stock_list.stock_all()  #获取上证股票维表
     stock_big_pool=list(df_dim.ts_code) #A 股票 3565 股票 list
     stock_pool=stock_big_pool
     start_time=time.time()
     total = len(stock_pool)
     time_control=1
-    for i in range(len(stock_pool)):
+    for i in range(320,len(stock_pool)):
         try:
+            #查重模块，简单认为超过500天就是全部数据，后期在过滤处理缺失天数
+            sql_test="select count(1) from stock_all_plus where stock_code= '%s'" % (stock_pool[i])
+            cursor.execute(sql_test)
+            db.commit()
+            data_test=cursor.fetchall()
+            if data_test[0][0]>500:
+                continue
+
             #频率控制模块
             time_control+=1
             sleep_time=time.time()-start_time
@@ -172,6 +180,8 @@ def init_stock_all_plus():
             df_new=df.merge(df_dim,on='ts_code')
             df=df_new
             print('Seq: ' + str(i+1) + ' of ' + str(total) + '   Code: ' + str(stock_pool[i]))
+            
+            
             c_len = df.shape[0]
         except Exception as aa:
             print(aa)
@@ -226,19 +236,37 @@ def init_stock_all(stock_pool):
             except Exception as err:
                 # print 'already exists!'
                 continue
+@time_used("btc")
+def init_btc_5min(start_dt,end_dt):
+    df = pro.query('coinbar', exchange='huobi', symbol='btcusdt', freq='15min', start_date=start_dt, end_date=end_dt)
+    c_len = df.shape[0]
+    data=np.array(df)
+    for j in range(c_len):
+        resu = list(data[j])
+        logger.debug(resu)
+        # state_dt = (datetime.datetime.strptime(resu[1], "%Y-%m%d %H:%M:%S")).strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            sql_insert = "INSERT INTO btc_5min(symbol,date,open,high,low,close,vol) VALUES ('%s', '%s', '%.2f', '%.2f','%.2f','%.2f','%i')" % (str(resu[0]),str(resu[1]),float(resu[2]),float(resu[3]),float(resu[4]),float(resu[5]),float(resu[6]))
+            cursor.execute(sql_insert)
+            db.commit()
+        except Exception as err:
+            logger.info(err)
+            # print 'already exists!'
+            continue
 if __name__ == '__main__':
 
     # 建立数据库连接,剔除已入库的部分
     # 设定需要获取数据的股票池
     bt=bt()
-    stock_pool=bt.stock_pool #从 paraset 获取
-    logger.info(stock_pool)
+    # stock_pool=bt.stock_pool #从 paraset 获取
+    # logger.info(stock_pool)
     # stock_fmac(start_dt='20180601',end_dt=end_dt)
-    init_top_list(start_dt='20180101',end_dt=end_dt)
+    # init_top_list(start_dt='20180601',end_dt=end_dt)
     # trade_cal() #初始化交易日期
     # init_stock_index() # 初始化上证指数
-    # init_stock_all_plus() #拉取全部3556支股票前复权数据到本地
+    init_stock_all_plus() #拉取全部3556支股票前复权数据到本地
     # init_stock_all(stock_pool)#初始化stock_all用于量化分析
+    # init_btc_5min('20180929','20181001')
     cursor.close()
     db.close()
     print('All Finished!')
