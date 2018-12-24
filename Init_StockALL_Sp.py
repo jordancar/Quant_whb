@@ -147,7 +147,7 @@ def init_stock_index():
 
 
 def init_stock_all_plus():
-    start_dt='20181204'
+    start_dt='20181211'
     df_dim=stock_list.stock_all()  #获取上证股票维表
     stock_big_pool=list(df_dim.ts_code) #A 股票 3565 股票 list
     stock_pool=stock_big_pool
@@ -231,13 +231,13 @@ if __name__ == '__main__':
     # 建立数据库连接,剔除已入库的部分
     # 设定需要获取数据的股票池
     bt=bt()
-    stock_pool=bt.stock_pool #从 paraset 获取
-    logger.info(stock_pool)
+    # stock_pool=bt.stock_pool #从 paraset 获取
+    # logger.info(stock_pool)
     # stock_fmac(start_dt='20180601',end_dt=end_dt)
     init_top_list(start_dt='20180101',end_dt=end_dt)
     # trade_cal() #初始化交易日期
-    # init_stock_index() # 初始化上证指数
-    # init_stock_all_plus() #拉取全部3556支股票前复权数据到本地
+    init_stock_index() # 初始化上证指数
+    init_stock_all_plus() #拉取全部3556支股票前复权数据到本地
     # init_stock_all(stock_pool)#初始化stock_all用于量化分析
     cursor.close()
     db.close()
