@@ -46,6 +46,13 @@ select * from btc_5min
 into outfile '/Users/wanghongbo8/fonts_whb/btc_5min.csv' character set utf8 
  fields terminated by ',' optionally enclosed by '"' 
  lines terminated by '\n';
+
+
+--windows system
+ select * from btc_5min 
+into outfile 'd:/btc_5min.csv' character set utf8 
+ fields terminated by ',' optionally enclosed by '"' 
+ lines terminated by '\n';
 --创建参数表，写入本地分析待用
 create table backtest_paraset(
         back_test_turn int(11)   AUTO_INCREMENT,

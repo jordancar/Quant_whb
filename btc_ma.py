@@ -4,6 +4,7 @@ import pymysql
 import pandas as pd
 import matplotlib.pyplot as plt 
 import numpy as np
+
 class get_env(object):
     def __init__(self):
         self.db=pymysql.connect(host='127.0.0.1', user='root', passwd='root', db='stock', charset='utf8')
@@ -13,32 +14,44 @@ class get_env(object):
 env=get_env()
 pro=env.pro 
 # df = pro.query('coinbar', exchange='huobi', symbol='btcusdt', freq='15min', start_date='20181217', end_date='20181225')
-df=pd.read_csv('/Users/wanghongbo8/fonts_whb/btc_5min.csv') #2018.9.1-today
+#linux
+# df=pd.read_csv('/Users/wanghongbo8/fonts_whb/btc_5min.csv') #2018.9.1-today
+#windows
+df=pd.read_csv(r'd:\btc_5min.csv') #2018.9.1-today
 df.columns=[u'symbol', u'date', u'open', u'high', u'low', u'close', u'vol']
-df=df[(df.date>'2018-12-17')&(df.date<='2018-12-25')]
+df=df[(df.date>'2018-11-27')&(df.date<='2018-12-28')]
 df['dt']=df.date.apply(lambda x: str(x)[0:10])
 df=df.sort_values('date',ascending=True)
 df=df.reset_index(drop=True)
 
 # print df.head()
 
+df['predict']=0
 df['profit']=0        
 
-ma_list = [('fast',3), ('mid',10), ('slow',16)]
+ma_list = [('fast',4), ('mid',10), ('slow',20)]
 for ma in ma_list:
     df['ma_'+str(ma[0])]=df.close.rolling(ma[1]).mean()
     df['shift_ma_'+str(ma[0])]=df.close.rolling(ma[1]).mean().shift(-1)
-idx= df[(df.ma_fast<=df.ma_slow)&(df.shift_ma_fast>df.shift_ma_slow)].index
-y=df[(df.ma_fast<df.ma_slow)&(df.shift_ma_fast>=df.shift_ma_slow)].close.tolist()
-idx_sold=df[(df.ma_fast>=df.ma_slow)&(df.shift_ma_fast<df.shift_ma_slow)].index
-y_sold=df[(df.ma_fast>=df.ma_slow)&(df.shift_ma_fast<df.shift_ma_slow)].close.tolist()
-df.loc[(df.ma_fast<df.ma_slow)&(df.shift_ma_fast>=df.shift_ma_slow),'profit']=1 #买入
-df.loc[(df.ma_fast>=df.ma_slow)&(df.shift_ma_fast<df.shift_ma_slow),'profit']=-1 #卖出
+
+df.loc[(df.ma_fast<df.ma_slow)&(df.shift_ma_fast>=df.shift_ma_slow),'predict']=1 #买入
+df.loc[(df.ma_fast>=df.ma_slow)&(df.shift_ma_fast<df.shift_ma_slow),'predict']=-1 #卖出
+df['profit']=df.predict.shift(1) #真实买卖点错向后错15分钟
+df.profit=df.profit.fillna(0)
+df.profit=df.profit.astype(int)
+print df[['date','profit','predict','close']].head(100)
+
+idx= df[(df.profit==1)].index
+y=df[(df.profit==1)].close.tolist()
+idx_sold=df[(df.profit==-1)].index
+y_sold=df[(df.profit==-1)].close.tolist()
+# aaa=raw_input('wait')
+
 
 origin_x=[x for x in range(len(df.close))]
 origin_xlabel=[]
 for x in range(len(df.close)):
-    if x%27==0:
+    if x%2==0:
         origin_xlabel.append(df.date.iloc[x])
     else:
         origin_xlabel.append("")
@@ -55,13 +68,13 @@ for xy in zip(idx,y):
 for xy in zip(idx_sold,y_sold):
     cd+=1
     plt.annotate("(sold: %s)"%xy[1],xy=xy,xytext=(50,60*(-1)**cd),textcoords='offset points',arrowprops=dict(alpha=0.8,facecolor='c',edgecolor='c',connectionstyle="arc3,rad=0.3",arrowstyle="->"))
-plt.plot(df.close)
-plt.xticks(origin_x,(origin_xlabel),rotation=85)
-plt.plot(df.ma_fast)
-plt.plot(df.ma_mid)
-plt.plot(df.ma_slow)
-# plt.savefig(r"D:\ma.png")
-plt.show()
+# plt.plot(df.close)
+# plt.xticks(origin_x,(origin_xlabel),rotation=85)
+# plt.plot(df.ma_fast)
+# # plt.plot(df.ma_mid)
+# plt.plot(df.ma_slow)
+# # plt.savefig(r"D:\ma.png")
+# plt.show()
 
 def cal_profit(df):
     print df.dtypes
@@ -70,9 +83,20 @@ def cal_profit(df):
     #取出最近的买点和卖点pair,忽略中间的买点日期
     poi=[] 
     pivot=1
+    ind=0 #定义poi索引，用于计算上一次有效存入poi的买入价
     for  i in range(df.shape[0]):
         if df.profit.iloc[i]==pivot: #初始，寻找买点
+            if pivot==-1 and df.close.iloc[i]<poi[ind-1][1]:
+                if df.close.iloc[i]/poi[ind-1][1] -1 <-0.55: #如果亏损超过5% 止损 
+                    poi.append([df.date.iloc[i],df.close.iloc[i],df.profit.iloc[i]]) 
+                    ind+=1
+                    pivot=(-pivot) #买卖点切换
+                    continue #继续寻找卖点
+                else:    
+                    print "放弃在{}-{}亏损卖出".format(df.date.iloc[i],df.close.iloc[i])
+                    continue #放弃本次卖点
             poi.append([df.date.iloc[i],df.close.iloc[i],df.profit.iloc[i]]) 
+            ind+=1
             pivot=(-pivot) #买卖点切换
     for e in poi:
         print e
