@@ -263,9 +263,9 @@ if __name__ == '__main__':
     # stock_fmac(start_dt='20180601',end_dt=end_dt)
     # init_top_list(start_dt='20180601',end_dt=end_dt)
     # trade_cal() #初始化交易日期
-    init_stock_index() # 初始化上证指数
+    # init_stock_index() # 初始化上证指数
     # init_stock_all(stock_pool)#初始化stock_all用于量化分析
-    # init_btc_5min('20180929','20181001')
+    init_btc_5min('20180801','20181227')
     cursor.close()
     db.close()
     print('All Finished!')
