@@ -29,8 +29,8 @@ def buy(stock_code,opdate,buy_money):
             return -1 
         buy_price = float(done_set_buy[0][3])
         print "buy_price",buy_price
-        if buy_price >= 195:
-            return 0
+        # if buy_price >= 195:
+        #     return 0
         vol, rest = divmod(min(deal_buy.cur_money_rest, buy_money), buy_price * 100)
         print "vol, rest:",vol,rest
         vol = vol * 100

@@ -108,10 +108,11 @@ def stock_fmac(start_dt,end_dt):#各股票市值
                 logger.debug(e)    
     
 def trade_cal(start_date='19990101',end_date=end_dt): #返回指定日期区间的交易日
-    df_trade = pro.trade_cal(exchange_id='', is_open=1, start_date='19990101', end_date=end_dt)
+    # df_trade = pro.trade_cal(exchange_id='', is_open=1, start_date='19990101', end_date=end_dt)
+    df_trade = pro.query('coinbar', exchange='huobi', symbol='btcusdt', freq='daily', start_date='20160801', end_date=end_dt)
     insert_list=np.array(df_trade).tolist()
     for r in insert_list:
-        sql="insert into trade_day(exchange,cal_date,is_open) values('%s','%s','%i')" %(r[0],r[1],r[2])
+        sql="insert into trade_day(exchange,cal_date,is_open) values('%s','%s','%i')" %(r[0],r[1],1)
         cursor.execute(sql)
         db.commit()
     logger.info('trade cal done.')
@@ -238,17 +239,23 @@ def init_stock_all(stock_pool):
                 continue
 @time_used("btc")
 def init_btc_5min(start_dt,end_dt):
-    df = pro.query('coinbar', exchange='huobi', symbol='btcusdt', freq='15min', start_date=start_dt, end_date=end_dt)
+    df = pro.query('coinbar', exchange='huobi', symbol='btcusdt', freq='daily', start_date=start_dt, end_date=end_dt)
     c_len = df.shape[0]
     data=np.array(df)
     for j in range(c_len):
         resu = list(data[j])
         logger.debug(resu)
-        # state_dt = (datetime.datetime.strptime(resu[1], "%Y-%m%d %H:%M:%S")).strftime('%Y-%m-%d %H:%M:%S')
+        # state_dt = (datetime.datetime.strptime(resu[1], "%Y-%m-%d")).strftime('%Y-%m-%d')
         try:
-            sql_insert = "INSERT INTO btc_5min(symbol,date,open,high,low,close,vol) VALUES ('%s', '%s', '%.2f', '%.2f','%.2f','%.2f','%i')" % (str(resu[0]),str(resu[1]),float(resu[2]),float(resu[3]),float(resu[4]),float(resu[5]),float(resu[6]))
+            # sql_insert = "INSERT INTO btc_5min(symbol,date,open,high,low,close,vol) VALUES ('%s', '%s', '%.2f', '%.2f','%.2f','%.2f','%i')" % (str(resu[0]),str(resu[1]),float(resu[2]),float(resu[3]),float(resu[4]),float(resu[5]),float(resu[6]))
+            # cursor.execute(sql_insert)
+            # db.commit()
+    
+            sql_insert = "INSERT INTO stock_all_plus(state_dt,stock_code,open,close,high,low,vol,amount,pre_close,amt_change,pct_change,name,area,industry) VALUES ('%s', '%s', '%.2f', '%.2f','%.2f','%.2f','%i','%.2f','%.2f','%.2f','%.2f','%s','%s','%s')" \
+                % (resu[1],str(resu[0]),float(resu[2]),float(resu[5]),float(resu[3]),float(resu[4]),float(resu[6]),0,0,0,0,0,'','')
             cursor.execute(sql_insert)
             db.commit()
+
         except Exception as err:
             logger.info(err)
             # print 'already exists!'
@@ -265,7 +272,7 @@ if __name__ == '__main__':
     # trade_cal() #初始化交易日期
     # init_stock_index() # 初始化上证指数
     # init_stock_all(stock_pool)#初始化stock_all用于量化分析
-    init_btc_5min('20180801','20181227')
+    init_btc_5min('20160801',end_dt=end_dt)
     cursor.close()
     db.close()
     print('All Finished!')

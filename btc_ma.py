@@ -4,6 +4,7 @@ import pymysql
 import pandas as pd
 import matplotlib.pyplot as plt 
 import numpy as np
+import talib
 
 class get_env(object):
     def __init__(self):
@@ -15,11 +16,11 @@ env=get_env()
 pro=env.pro 
 # df = pro.query('coinbar', exchange='huobi', symbol='btcusdt', freq='15min', start_date='20181217', end_date='20181225')
 #linux
-# df=pd.read_csv('/Users/wanghongbo8/fonts_whb/btc_5min.csv') #2018.9.1-today
+df=pd.read_csv('/Users/wanghongbo8/fonts_whb/btc_5min.csv') #2018.9.1-today
 #windows
-df=pd.read_csv(r'd:\btc_5min.csv') #2018.9.1-today
+# df=pd.read_csv(r'd:\btc_5min.csv') #2018.9.1-today
 df.columns=[u'symbol', u'date', u'open', u'high', u'low', u'close', u'vol']
-df=df[(df.date>'2018-11-27')&(df.date<='2018-12-28')]
+df=df[(df.date>'2018-08-27')&(df.date<='2018-12-28')]
 df['dt']=df.date.apply(lambda x: str(x)[0:10])
 df=df.sort_values('date',ascending=True)
 df=df.reset_index(drop=True)
@@ -31,8 +32,13 @@ df['profit']=0
 
 ma_list = [('fast',4), ('mid',10), ('slow',20)]
 for ma in ma_list:
-    df['ma_'+str(ma[0])]=df.close.rolling(ma[1]).mean()
-    df['shift_ma_'+str(ma[0])]=df.close.rolling(ma[1]).mean().shift(-1)
+    # #ma拟合
+    # df['ma_'+str(ma[0])]=df.close.rolling(ma[1]).mean()
+    # df['shift_ma_'+str(ma[0])]=df.close.rolling(ma[1]).mean().shift(-1)
+
+    #ema拟合
+    df['ma_'+str(ma[0])]=talib.EMA(df.close,timeperiod=ma[1])
+    df['shift_ma_'+str(ma[0])]=talib.EMA(df.close,timeperiod=ma[1]).shift(-1)
 
 df.loc[(df.ma_fast<df.ma_slow)&(df.shift_ma_fast>=df.shift_ma_slow),'predict']=1 #买入
 df.loc[(df.ma_fast>=df.ma_slow)&(df.shift_ma_fast<df.shift_ma_slow),'predict']=-1 #卖出
@@ -87,7 +93,7 @@ def cal_profit(df):
     for  i in range(df.shape[0]):
         if df.profit.iloc[i]==pivot: #初始，寻找买点
             if pivot==-1 and df.close.iloc[i]<poi[ind-1][1]:
-                if df.close.iloc[i]/poi[ind-1][1] -1 <-0.55: #如果亏损超过5% 止损 
+                if df.close.iloc[i]/poi[ind-1][1] -1 <-0.001: #如果亏损超过5% 止损 
                     poi.append([df.date.iloc[i],df.close.iloc[i],df.profit.iloc[i]]) 
                     ind+=1
                     pivot=(-pivot) #买卖点切换

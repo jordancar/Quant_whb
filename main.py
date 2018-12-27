@@ -9,9 +9,10 @@ from pylab import *
 import Cap_Update_daily as cap_update
 import tushare as ts
 from para_set import back_test
+import pandas as pd 
 now_time=str(datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 end_time=str((datetime.datetime.today()-datetime.timedelta(days=8)).strftime('%Y-%m-%d'))
-bt=back_test(operate_tm=str(now_time),end_time=end_time,strategy='') #初始化回测参数类
+bt=back_test(operate_tm=str(now_time),end_time=end_time,strategy='avg') #初始化回测参数类
 
 
 def write_para(): #写入本次回测参数配置
@@ -64,8 +65,8 @@ if __name__ == '__main__':
     date_seq_start=bt.start_time
     # date_seq_end = str(year) + '-12-04'
     date_seq_end=bt.end_time
-    # stock_pool = ['603912.SH', '300666.SZ', '300618.SZ', '002049.SZ', '300672.SZ']
-    stock_pool=bt.stock_pool
+    stock_pool = ['btcusdt']
+    # stock_pool=bt.stock_pool
     
     # 先清空之前的测试记录,并创建中间表
     sql_wash1 = 'delete from my_capital where seq != 1'
@@ -93,13 +94,22 @@ if __name__ == '__main__':
     db.commit()
 
 
-    # 建回测时间序列
-    back_test_date_start = (datetime.datetime.strptime(date_seq_start, '%Y-%m-%d')).strftime('%Y%m%d')
-    back_test_date_end = (datetime.datetime.strptime(date_seq_end, "%Y-%m-%d")).strftime('%Y%m%d')
-    df = pro.trade_cal(exchange_id='', is_open=1, start_date=back_test_date_start, end_date=back_test_date_end)
-    date_temp = list(df.iloc[:, 1])
-    date_seq = [(datetime.datetime.strptime(x, "%Y%m%d")).strftime('%Y-%m-%d') for x in date_temp]
-    print(date_seq)
+    # 建回测时间序列 非btc
+    # back_test_date_start = (datetime.datetime.strptime(date_seq_start, '%Y-%m-%d')).strftime('%Y%m%d')
+    # back_test_date_end = (datetime.datetime.strptime(date_seq_end, "%Y-%m-%d")).strftime('%Y%m%d')
+    # df = pro.trade_cal(exchange_id='', is_open=1, start_date=back_test_date_start, end_date=back_test_date_end)
+    # date_temp = list(df.iloc[:, 1])
+
+    #BTC回测时间序列生成
+    sql_trade="select * from trade_day where cal_date>='%s' and cal_date<='%s'" % (date_seq_start,date_seq_end)
+ 
+    cursor.execute(sql_trade)
+    db.commit()
+    df=pd.DataFrame(list(cursor.fetchall())) 
+ 
+    date_temp=list(df.iloc[:, 1])
+    date_seq = [(datetime.datetime.strptime(x, "%Y-%m-%d")).strftime('%Y-%m-%d') for x in date_temp]
+    print date_seq
 
     #开始模拟交易
     index = 1
@@ -122,17 +132,21 @@ if __name__ == '__main__':
         # 每5个交易日更新一次配仓比例
 
         if divmod(day_index+bt.operate_days-1,bt.operate_days)[1] == 0:
-            stock_pool=bt.get_stock_list(date_seq[i-1],1)#跟根据前一日板块top1获取stock_pool
+            # stock_pool=bt.get_stock_list(date_seq[i-1],1)#跟根据前一日板块top1获取stock_pool
+            stock_pool=['btcusdt']
             
             logger.info("Daynamic stock chosen strategy,new stock_pool:{}".format(stock_pool))
             portfolio_pool = stock_pool
-            if len(portfolio_pool) < 5:
-                print('Less than 5 stocks for portfolio!! state_dt : ' + str(date_seq[i]))
-                continue
-            pf_src = pf.get_portfolio(portfolio_pool,date_seq[i-1],bt.para_window)
+            ##btc 回测 取消限制
+            # if len(portfolio_pool) < 5:
+            #     print('Less than 5 stocks for portfolio!! state_dt : ' + str(date_seq[i]))
+            #     continue
+            # pf_src = pf.get_portfolio(portfolio_pool,date_seq[i-1],bt.para_window)
             # 取最佳收益方向的资产组合
-            risk = pf_src[0][0]
-            weight = pf_src[0][1]
+            # risk = pf_src[0][0]
+            # weight = pf_src[0][1]
+            risk=0
+            weight=[]
             print "risk:",risk,"weight:",weight
             if bt.strategy=='avg':
                 weight=[]
